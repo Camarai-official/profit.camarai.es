@@ -59,7 +59,7 @@ cp services.example.js services.js
 2. Edita la URL del endpoint en `services.js` (búsqueda de `https://url-del-servidor/endpoint`) para apuntar a tu servicio real (por ejemplo, un webhook de n8n):
 
 ```js
-const response = await fetch("https://tu-dominio.tld/tu-endpoint", {
+const response = await fetch("https://url-del-servidor/endpoint", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ data }),
