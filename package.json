@@ -1,0 +1,24 @@
+{
+  "name": "genreport",
+  "version": "1.0.0",
+  "description": "",
+  "main": "logic.js",
+  "scripts": {
+    "start": "live-server --port=8000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Miguelriu02/genreport.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Miguelriu02/genreport/issues"
+  },
+  "homepage": "https://github.com/Miguelriu02/genreport#readme",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
