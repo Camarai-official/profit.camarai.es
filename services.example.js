@@ -5,36 +5,53 @@ document.addEventListener('DOMContentLoaded', () => {
     let barChart;
 
     // --- Función para renderizar gráfico de barras ---
-    function renderBarChart(nombreRestaurante, minRevenue, maxRevenue) {
-        const ctx = document.getElementById('bar-chart-rentabilidad').getContext('2d');
-        if (barChart) barChart.destroy();
-        barChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: [nombreRestaurante, nombreRestaurante + ' + Camarai'],
-                datasets: [{
-                    label: 'Ganancia mensual (€)',
-                    data: [minRevenue ?? 0, maxRevenue ?? 0],
-                    backgroundColor: ['#E74C3C', '#9D59E7']
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: context => 'Ganancia: €' + (context.parsed.y ?? 0).toLocaleString('es-ES', { minimumFractionDigits: 2 })
-                        }
-                    }
-                },
-                scales: {
-                    x: { ticks: { color: '#E0E0E0', font: { weight: 'bold' } } },
-                    y: { beginAtZero: true, ticks: { color: '#E0E0E0' } }
-                }
-            }
-        });
-    }
+	function renderBarChart(nombreRestaurante, minRevenue, maxRevenue) {
+		const ctx = document.getElementById('bar-chart-rentabilidad').getContext('2d');
+		if (barChart) barChart.destroy();
+		const base = minRevenue ?? 0;
+		const mejora = Math.max((maxRevenue ?? 0) - base, 0);
+		barChart = new Chart(ctx, {
+			type: 'bar',
+			data: {
+				labels: [nombreRestaurante, nombreRestaurante + ' + Camarai'],
+					datasets: [
+						{
+							label: 'Ganancia base (Takos)',
+							data: [base, 0],
+							backgroundColor: '#E74C3C'
+						},
+						{
+							label: 'Ganancia base (Takos + Camarai)',
+							data: [0, base],
+							backgroundColor: '#9D59E7'
+						},
+						{
+							label: 'Mejora con Camarai',
+							data: [0, mejora],
+							backgroundColor: '#34D399'
+						}
+					]
+			},
+			options: {
+				responsive: true,
+				plugins: {
+					legend: { display: true },
+					tooltip: {
+						callbacks: {
+							label: context => {
+								const value = context.parsed.y ?? 0;
+								return `${context.dataset.label}: €${value.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
+							}
+						}
+					}
+				},
+				scales: {
+					x: { stacked: true, ticks: { color: '#E0E0E0', font: { weight: 'bold' } } },
+					y: { stacked: true, beginAtZero: true, ticks: { color: '#E0E0E0' } }
+				}
+			}
+		});
+	}
 
     // --- Función para actualizar texto de un elemento por id ---
     function setTextById(id, text) {
@@ -95,11 +112,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const p = processed[0]?.data;
             if (!p) throw new Error('Datos procesados vacíos');
 
+			// Diferencia de coste de personal (antes - después)
+			const staffDelta = (data.coste_trabajadores_mensual ?? 0) - (p.coste_trabajadores_mensual ?? 0);
+
             // --- Gráfico de barras ---
             renderBarChart(
                 p.nombre_restaurante ?? data.nombre_restaurante,
                 p.facturacion_mensual_minima ?? data.facturacion_media_mensual,
-                p.facturacion_mensual_maxima ?? data.facturacion_media_mensual
+				((p.facturacion_mensual_maxima ?? data.facturacion_media_mensual) + (staffDelta ?? 0))
             );
 
             // --- Comparativas punto a punto ---
@@ -116,9 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
             setTextById('orders-without', data.numero_comandas_diarias);
             setTextById('orders-with', p.numero_comandas_diarias ?? data.numero_comandas_diarias);
 
-            const staffDelta = (data.coste_trabajadores_mensual ?? 0) - (p.coste_trabajadores_mensual ?? 0);
             const totalSavings = (upsellWith ?? 0) + (staffDelta ?? 0);
-            setTextById('yearly-savings', `+ ${totalSavings.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €`);
+            setTextById('yearly-savings', `+ ${(totalSavings*12).toLocaleString('es-ES', { minimumFractionDigits: 2 })} €`);
             const savingsCard = document.getElementById('savings-card');
             if (savingsCard) savingsCard.classList.remove('hidden');
 
