@@ -93,6 +93,3 @@ Solución de problemas
 - Error al procesar datos: verifica que el endpoint en `services.js` es accesible (CORS, URL correcta, método POST).
 - Gráfico vacío: confirma que la respuesta del backend devuelve los campos esperados (`facturacion_mensual_minima`, `facturacion_mensual_maxima`, etc.).
 - 404 en `services.js`: asegúrate de haber creado `services.js` a partir de `services.example.js` y que está en la raíz junto a `index.html`.
-
-Licencia
-ISC
