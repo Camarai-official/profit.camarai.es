@@ -4,6 +4,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingOverlay = document.getElementById('loading-overlay');
     let barChart;
 
+    //-- Función para enviar los parametros de la URL que visita el dueño del restaurante
+    function getParamsUrl() {
+        let wa = ''
+        let email = ''
+        let status_opened_with_params = false
+
+        const raw = (window.location && (window.location.hash || window.location.search)) || ''
+        const cleaned = raw.replace(/^#/, '').replace(/^\?/, '')
+        const normalized = cleaned.replace(/\?/g, '&')
+        const params = new URLSearchParams(normalized)
+
+        wa = params.get('wa') || ''
+        email = params.get('email') || ''
+
+        if (wa || email) {
+            status_opened_with_params = true
+        }
+        
+        if (status_opened_with_params)
+        {
+            fetch('https://bot1.camarai.es/webhook/genreport-opened', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wa, email })
+        });
+        }
+    }
+
+    getParamsUrl()
+
+
     // --- Función para renderizar gráfico de barras ---
 	function renderBarChart(nombreRestaurante, minRevenue, maxRevenue) {
 		const ctx = document.getElementById('bar-chart-rentabilidad').getContext('2d');
@@ -29,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							label: 'Mejora con Camarai',
 							data: [0, mejora],
 							backgroundColor: '#34D399'
-						}
+                        }
 					]
 			},
 			options: {
@@ -46,8 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
 					}
 				},
 				scales: {
-					x: { stacked: true, ticks: { color: '#E0E0E0', font: { weight: 'bold' } } },
-					y: { stacked: true, beginAtZero: true, ticks: { color: '#E0E0E0' } }
+					x: { ticks: { color: '#E0E0E0', font: { weight: 'bold' } } },
+					y: { beginAtZero: true, ticks: { color: '#E0E0E0' } }
 				}
 			}
 		});
@@ -100,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             loadingOverlay.classList.remove('hidden');
 
-            const response = await fetch('https://url-servidor/api', {
+            const response = await fetch('https://bot1.camarai.es/webhook/gen-report', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ data })
