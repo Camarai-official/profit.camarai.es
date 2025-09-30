@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			options: {
 				responsive: true,
 				plugins: {
-					legend: { display: true },
+					legend: { display: true, labels: { padding: 16 } },
 					tooltip: {
 						callbacks: {
                             label: context => {
@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						}
 					}
 				},
+				layout: { padding: { top: 8 } },
 				scales: {
 					x: { ticks: { color: '#E0E0E0', font: { weight: 'bold' } } },
 					y: { beginAtZero: true, ticks: { color: '#E0E0E0' } }
