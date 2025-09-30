@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			options: {
 				responsive: true,
 				plugins: {
-					legend: { display: true },
+					legend: { display: true, labels: { padding: 16, color: '#E0E0E0' } },
 					tooltip: {
 						callbacks: {
                             label: context => {
@@ -135,12 +135,39 @@ document.addEventListener('DOMContentLoaded', () => {
 						}
 					}
 				},
+				layout: { padding: { top: 8 } },
 				scales: {
 					x: { ticks: { color: '#E0E0E0', font: { weight: 'bold' } } },
-					y: { beginAtZero: true, ticks: { color: '#E0E0E0' } }
+					y: { beginAtZero: true, ticks: { color: '#E0E0E0', font: { weight: 'bold' } } }
 				}
 			}
 		});
+
+		function setChartPrintStyles(chart, printing) {
+			try {
+				const color = printing ? '#000000' : '#E0E0E0';
+				const weight = printing ? 'bold' : 'bold';
+				chart.options.scales.x.ticks.color = color;
+				chart.options.scales.x.ticks.font = { ...(chart.options.scales.x.ticks.font||{}), weight };
+				chart.options.scales.y.ticks.color = color;
+				chart.options.scales.y.ticks.font = { ...(chart.options.scales.y.ticks.font||{}), weight };
+				if (chart.options.plugins && chart.options.plugins.legend && chart.options.plugins.legend.labels) {
+					chart.options.plugins.legend.labels.color = color;
+					chart.options.plugins.legend.labels.font = { ...(chart.options.plugins.legend.labels.font||{}), weight };
+				}
+				chart.update('none');
+			} catch (_) {}
+		}
+
+		function handleBeforePrint() { setChartPrintStyles(barChart, true); }
+		function handleAfterPrint() { setChartPrintStyles(barChart, false); }
+
+		try {
+			window.removeEventListener('beforeprint', handleBeforePrint);
+			window.removeEventListener('afterprint', handleAfterPrint);
+		} catch(_) {}
+		window.addEventListener('beforeprint', handleBeforePrint);
+		window.addEventListener('afterprint', handleAfterPrint);
 	}
 
     // --- Función para actualizar texto de un elemento por id ---
@@ -281,4 +308,111 @@ document.addEventListener('DOMContentLoaded', () => {
             el.style.whiteSpace = 'nowrap';
         } catch (_) {}
     });
+
+    // --- Tour interactivo ---
+    const tourOverlay = document.getElementById('tour-overlay');
+    const tourPopover = document.getElementById('tour-popover');
+    const tourContent = document.getElementById('tour-content');
+    const tourPrev = document.getElementById('tour-prev');
+    const tourNext = document.getElementById('tour-next');
+    const tourEnd = document.getElementById('tour-end');
+    const startTourBtn = document.getElementById('start-tour');
+
+    // Pasos solo hasta el botón Generar
+    const tourSteps = [
+        { selector: '#restaurant-name', text: 'Escribe el nombre de tu restaurante. Aparece en el informe y gráfico.' },
+        { selector: '#monthly-revenue', text: 'Facturación media mensual. Se usa como base para calcular ganancias.' },
+        { selector: '#employees', text: 'Número total de trabajadores actuales.' },
+        { selector: '#employee-cost', text: 'Coste mensual de personal. Se compara con el coste optimizado.' },
+        { selector: '#rent-cost', text: 'Coste mensual de alquiler del local.' },
+        { selector: '#product-cost', text: 'Gasto mensual en productos o materia prima.' },
+        { selector: '#supply-cost', text: 'Suministros mensuales: luz, agua, internet, etc.' },
+        { selector: '#tables', text: 'Número de mesas. Influye en la rotación y el potencial de venta.' },
+        { selector: '#daily-orders', text: 'Comandas diarias promedio. Afecta a rotación y upselling.' },
+        { selector: '#generate-btn', text: 'Cuando termines, pulsa aquí para generar el informe.' }
+    ];
+
+    let tourIndex = 0;
+    let tourHighlightEl = null;
+
+    function clearHighlight() {
+        if (tourHighlightEl) {
+            tourHighlightEl.style.outline = '';
+            tourHighlightEl.style.boxShadow = '';
+            tourHighlightEl = null;
+        }
+    }
+
+    function positionPopover(target) {
+        const rect = target.getBoundingClientRect();
+        const pop = tourPopover;
+        const margin = 12;
+        let top = rect.bottom + margin + window.scrollY;
+        let left = rect.left + window.scrollX;
+        const maxLeft = window.scrollX + window.innerWidth - pop.offsetWidth - margin;
+        if (left > maxLeft) left = Math.max(margin, maxLeft);
+        // Si no cabe abajo, muévelo arriba
+        if (top + pop.offsetHeight > window.scrollY + window.innerHeight) {
+            top = rect.top - pop.offsetHeight - margin + window.scrollY;
+        }
+        if (top < window.scrollY + margin) top = window.scrollY + margin;
+        pop.style.top = `${top}px`;
+        pop.style.left = `${left}px`;
+    }
+
+    function showStep(idx) {
+        tourIndex = Math.max(0, Math.min(idx, tourSteps.length - 1));
+        const step = tourSteps[tourIndex];
+        const target = document.querySelector(step.selector);
+        if (!target) return;
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+            clearHighlight();
+            tourHighlightEl = target;
+            tourHighlightEl.style.outline = '2px solid #9D59E7';
+            tourHighlightEl.style.boxShadow = '0 0 0 4px rgba(157,89,231,0.35)';
+            tourContent.innerText = step.text;
+            positionPopover(target);
+            tourPrev.disabled = tourIndex === 0;
+            // Ocultar "Siguiente" en el último paso (botón Generar)
+            if (tourIndex === tourSteps.length - 1) {
+                tourNext.style.display = 'none';
+            } else {
+                tourNext.style.display = '';
+            }
+        }, 250);
+    }
+
+    function endTour() {
+        clearHighlight();
+        tourOverlay.classList.add('hidden');
+        window.removeEventListener('resize', onResizeReposition);
+        window.removeEventListener('scroll', onResizeReposition, true);
+    }
+
+    function onResizeReposition() {
+        const step = tourSteps[tourIndex];
+        const target = document.querySelector(step.selector);
+        if (target) positionPopover(target);
+    }
+
+    // Ocultar botón de tour si ya se generó el informe previamente
+    try {
+        if (sessionStorage.getItem('report_generated') === '1' && startTourBtn) {
+            startTourBtn.style.display = 'none';
+        }
+    } catch(_) {}
+
+    if (startTourBtn && tourOverlay && tourPopover) {
+        startTourBtn.addEventListener('click', () => {
+            tourOverlay.classList.remove('hidden');
+            showStep(0);
+            window.addEventListener('resize', onResizeReposition);
+            window.addEventListener('scroll', onResizeReposition, true);
+        });
+    }
+
+    if (tourPrev) tourPrev.addEventListener('click', () => showStep(tourIndex - 1));
+    if (tourNext) tourNext.addEventListener('click', () => showStep(tourIndex + 1));
+    if (tourEnd) tourEnd.addEventListener('click', endTour);
 });
