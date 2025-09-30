@@ -276,6 +276,11 @@ document.addEventListener('DOMContentLoaded', () => {
     generateBtn.addEventListener('click', async () => {
         const data = getFormData();
         if (!data) return;
+        // Ocultar el botón de tour al pulsar "Generar Informe"
+        try { sessionStorage.setItem('report_generated', '1'); } catch(_) {}
+        if (typeof startTourBtn !== 'undefined' && startTourBtn) {
+            startTourBtn.style.display = 'none';
+        }
         await enviarYProcesar(data);
     });
 
