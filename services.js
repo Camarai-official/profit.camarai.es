@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			options: {
 				responsive: true,
 				plugins: {
-					legend: { display: true, labels: { padding: 16 } },
+					legend: { display: true, labels: { padding: 16, color: '#E0E0E0' } },
 					tooltip: {
 						callbacks: {
                             label: context => {
@@ -138,10 +138,36 @@ document.addEventListener('DOMContentLoaded', () => {
 				layout: { padding: { top: 8 } },
 				scales: {
 					x: { ticks: { color: '#E0E0E0', font: { weight: 'bold' } } },
-					y: { beginAtZero: true, ticks: { color: '#E0E0E0' } }
+					y: { beginAtZero: true, ticks: { color: '#E0E0E0', font: { weight: 'bold' } } }
 				}
 			}
 		});
+
+		function setChartPrintStyles(chart, printing) {
+			try {
+				const color = printing ? '#000000' : '#E0E0E0';
+				const weight = printing ? 'bold' : 'bold';
+				chart.options.scales.x.ticks.color = color;
+				chart.options.scales.x.ticks.font = { ...(chart.options.scales.x.ticks.font||{}), weight };
+				chart.options.scales.y.ticks.color = color;
+				chart.options.scales.y.ticks.font = { ...(chart.options.scales.y.ticks.font||{}), weight };
+				if (chart.options.plugins && chart.options.plugins.legend && chart.options.plugins.legend.labels) {
+					chart.options.plugins.legend.labels.color = color;
+					chart.options.plugins.legend.labels.font = { ...(chart.options.plugins.legend.labels.font||{}), weight };
+				}
+				chart.update('none');
+			} catch (_) {}
+		}
+
+		function handleBeforePrint() { setChartPrintStyles(barChart, true); }
+		function handleAfterPrint() { setChartPrintStyles(barChart, false); }
+
+		try {
+			window.removeEventListener('beforeprint', handleBeforePrint);
+			window.removeEventListener('afterprint', handleAfterPrint);
+		} catch(_) {}
+		window.addEventListener('beforeprint', handleBeforePrint);
+		window.addEventListener('afterprint', handleAfterPrint);
 	}
 
     // --- Función para actualizar texto de un elemento por id ---
