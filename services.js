@@ -4,7 +4,66 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingOverlay = document.getElementById('loading-overlay');
     let barChart;
 
-    //-- Función para enviar los parametros de la URL que visita el dueño del restaurante
+    function getCurrencyForLocale(locale) {
+        const l = (locale || '').toLowerCase();
+        if (l.includes('us')) return 'USD';
+        if (l.includes('gb') || l.includes('uk')) return 'GBP';
+        if (l.includes('jp')) return 'JPY';
+        if (l.includes('cn') || l.includes('zh-cn')) return 'CNY';
+        if (l.includes('tw') || l.includes('zh-tw')) return 'TWD';
+        if (l.includes('br') || l.includes('pt-br')) return 'BRL';
+        if (l.includes('mx')) return 'MXN';
+        if (l.includes('ar')) return 'ARS';
+        if (l.includes('cl')) return 'CLP';
+        if (l.includes('co')) return 'COP';
+        if (l.includes('pe')) return 'PEN';
+        if (l.includes('ca')) return 'CAD';
+        if (l.includes('au')) return 'AUD';
+        if (l.includes('in')) return 'INR';
+        if (l.includes('ch')) return 'CHF';
+        if (l.includes('se')) return 'SEK';
+        if (l.includes('no')) return 'NOK';
+        if (l.includes('dk')) return 'DKK';
+        if (l.includes('pl')) return 'PLN';
+        if (l.includes('cz')) return 'CZK';
+        if (l.includes('hu')) return 'HUF';
+        if (l.includes('ru')) return 'RUB';
+        if (l.includes('tr')) return 'TRY';
+        if (l.includes('il') || l.includes('he')) return 'ILS';
+        if (l.includes('kr')) return 'KRW';
+        if (l.includes('sa') || l.includes('ae')) return 'SAR';
+        return 'EUR';
+    }
+
+    function getNumberFormatter() {
+        const locale = (navigator.language || 'es-ES');
+        const currency = getCurrencyForLocale(locale);
+        const currencyFormatter = new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 2 });
+        const numberFormatter = new Intl.NumberFormat(locale);
+        const suffixCurrencyFormatter = (value) => {
+            const nbsp = '\u00A0';
+            try {
+                if (typeof currencyFormatter.formatToParts === 'function') {
+                    const parts = currencyFormatter.formatToParts(value);
+                    const sign = (parts.find(p => p.type === 'minusSign')?.value || (value < 0 ? '-' : ''));
+                    const number = parts
+                        .filter(p => ['integer','group','decimal','fraction'].includes(p.type))
+                        .map(p => p.value)
+                        .join('');
+                    const currencyPart = parts.find(p => p.type === 'currency');
+                    const currencySymbol = currencyPart ? currencyPart.value : '';
+                    return `${sign}${number}${nbsp}${currencySymbol}`.trim();
+                }
+            } catch (_) {}
+            const formatted = currencyFormatter.format(value);
+            const symbolMatch = formatted.replace(/[\d\s.,\u00A0\u202F\u200E\u200F\-+]/g, '');
+            const symbol = symbolMatch || '';
+            const numberOnly = formatted.replace(/[^\d.,\-+\u00A0\u202F]/g, '').trim();
+            return `${numberOnly}${nbsp}${symbol}`.trim();
+        };
+        return { locale, currency, currencyFormatter, suffixCurrencyFormatter, numberFormatter };
+    }
+
     function getParamsUrl() {
         let wa = ''
         let email = ''
@@ -36,28 +95,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Función para renderizar gráfico de barras ---
-	function renderBarChart(nombreRestaurante, minRevenue, maxRevenue) {
+    function renderBarChart(nombreRestaurante, minRevenue, maxRevenue) {
 		const ctx = document.getElementById('bar-chart-rentabilidad').getContext('2d');
 		if (barChart) barChart.destroy();
 		const base = minRevenue ?? 0;
 		const mejora = Math.max((maxRevenue ?? 0) - base, 0);
+        const { locale, currency, suffixCurrencyFormatter } = getNumberFormatter();
 		barChart = new Chart(ctx, {
 			type: 'bar',
 			data: {
-				labels: [nombreRestaurante, nombreRestaurante + ' + Camarai'],
+                labels: [nombreRestaurante, nombreRestaurante + ' + Camarai'],
 					datasets: [
 						{
-							label: 'Ganancia base (Takos)',
+                            label: 'Ganancia base (Takos)',
 							data: [base, 0],
 							backgroundColor: '#E74C3C'
 						},
 						{
-							label: 'Ganancia base (Takos + Camarai)',
+                            label: 'Ganancia base (Takos + Camarai)',
 							data: [0, base],
 							backgroundColor: '#9D59E7'
 						},
 						{
-							label: 'Mejora con Camarai',
+                            label: 'Mejora con Camarai',
 							data: [0, mejora],
 							backgroundColor: '#34D399'
                         }
@@ -69,10 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
 					legend: { display: true },
 					tooltip: {
 						callbacks: {
-							label: context => {
-								const value = context.parsed.y ?? 0;
-								return `${context.dataset.label}: €${value.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`;
-							}
+                            label: context => {
+                                const value = context.parsed.y ?? 0;
+                                return `${context.dataset.label}: ${suffixCurrencyFormatter(value)}`;
+                            }
 						}
 					}
 				},
@@ -157,18 +217,19 @@ document.addEventListener('DOMContentLoaded', () => {
             setTextById('turnover-without', p.rotacion_mesas_antes);
             setTextById('turnover-with', p.rotacion_mesas_despues);
 
-            setTextById('staff-cost-without', `${data.coste_trabajadores_mensual.toLocaleString('es-ES')} €`);
-            setTextById('staff-cost-with', `${p.coste_trabajadores_mensual.toLocaleString('es-ES')} €`);
+            const { suffixCurrencyFormatter, numberFormatter } = getNumberFormatter();
+            setTextById('staff-cost-without', suffixCurrencyFormatter(data.coste_trabajadores_mensual));
+            setTextById('staff-cost-with', suffixCurrencyFormatter(p.coste_trabajadores_mensual));
 
-            setTextById('upsell-without', '0 €');
+            setTextById('upsell-without', suffixCurrencyFormatter(0));
             const upsellWith = p.facturacion_mensual_maxima - p.facturacion_mensual_minima;
-            setTextById('upsell-with', `${upsellWith.toLocaleString('es-ES')} €`);
+            setTextById('upsell-with', suffixCurrencyFormatter(upsellWith));
 
-            setTextById('orders-without', data.numero_comandas_diarias);
-            setTextById('orders-with', p.numero_comandas_diarias ?? data.numero_comandas_diarias);
+            setTextById('orders-without', numberFormatter.format(data.numero_comandas_diarias));
+            setTextById('orders-with', numberFormatter.format(p.numero_comandas_diarias ?? data.numero_comandas_diarias));
 
             const totalSavings = (upsellWith ?? 0) + (staffDelta ?? 0);
-            setTextById('yearly-savings', `+ ${(totalSavings*12).toLocaleString('es-ES', { minimumFractionDigits: 2 })} €`);
+            setTextById('yearly-savings', `+ ${suffixCurrencyFormatter(totalSavings*12)}`);
             const savingsCard = document.getElementById('savings-card');
             if (savingsCard) savingsCard.classList.remove('hidden');
 
@@ -178,7 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
-            alert('Hubo un error al procesar los datos: ' + error.message);
+            const txt = (window.I18N?.error_processing || 'Hubo un error al procesar los datos: ') + error.message;
+            alert(txt);
         } finally {
             loadingOverlay.classList.add('hidden');
         }
