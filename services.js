@@ -142,7 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			}
 		});
-
+        
+        // --- Función para mostrar estilo de charts ---
 		function setChartPrintStyles(chart, printing) {
 			try {
 				const color = printing ? '#000000' : '#E0E0E0';
