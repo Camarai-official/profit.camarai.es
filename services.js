@@ -39,27 +39,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const locale = (navigator.language || 'es-ES');
         const currency = getCurrencyForLocale(locale);
         const currencyFormatter = new Intl.NumberFormat(locale, { style: 'currency', currency, minimumFractionDigits: 2 });
-        const numberFormatter = new Intl.NumberFormat(locale);
+        const numberFormatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const suffixCurrencyFormatter = (value) => {
             const nbsp = '\u00A0';
+            const safeValue = Number.isFinite(value) ? value : 0;
+            const abs = Math.abs(safeValue);
+            const sign = safeValue < 0 ? '-' : '';
             try {
                 if (typeof currencyFormatter.formatToParts === 'function') {
-                    const parts = currencyFormatter.formatToParts(value);
-                    const sign = (parts.find(p => p.type === 'minusSign')?.value || (value < 0 ? '-' : ''));
-                    const number = parts
-                        .filter(p => ['integer','group','decimal','fraction'].includes(p.type))
-                        .map(p => p.value)
-                        .join('');
+                    const parts = currencyFormatter.formatToParts(abs);
                     const currencyPart = parts.find(p => p.type === 'currency');
                     const currencySymbol = currencyPart ? currencyPart.value : '';
+                    const number = numberFormatter.format(abs);
                     return `${sign}${number}${nbsp}${currencySymbol}`.trim();
                 }
             } catch (_) {}
-            const formatted = currencyFormatter.format(value);
-            const symbolMatch = formatted.replace(/[\d\s.,\u00A0\u202F\u200E\u200F\-+]/g, '');
-            const symbol = symbolMatch || '';
-            const numberOnly = formatted.replace(/[^\d.,\-+\u00A0\u202F]/g, '').trim();
-            return `${numberOnly}${nbsp}${symbol}`.trim();
+            // Fallback: extrae símbolo y compón sufijo manualmente
+            const formatted = currencyFormatter.format(abs);
+            const symbol = formatted.replace(/[\d\s.,\u00A0\u202F\u200E\u200F\-+]/g, '');
+            const numberOnly = numberFormatter.format(abs);
+            return `${sign}${numberOnly}${nbsp}${symbol}`.trim();
         };
         return { locale, currency, currencyFormatter, suffixCurrencyFormatter, numberFormatter };
     }
@@ -263,5 +262,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.setAttribute('data-error', 'false');
             }
         });
+    });
+
+    // Proteger elementos monetarios frente a auto-traducción/reordenación
+    const amountIds = [
+        'staff-cost-without', 'staff-cost-with',
+        'upsell-without', 'upsell-with',
+        'yearly-savings'
+    ];
+    amountIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        try {
+            el.setAttribute('translate', 'no');
+            el.classList.add('notranslate');
+            el.style.direction = 'ltr';
+            el.style.unicodeBidi = 'isolate';
+            el.style.whiteSpace = 'nowrap';
+        } catch (_) {}
     });
 });
