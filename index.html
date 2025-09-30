@@ -227,6 +227,9 @@
             <p class="header-subtitle">
                 Descubre cómo nuestro software de TPV puede transformar la rentabilidad de tu restaurante.
             </p>
+            <div class="pad-top-4">
+                <button id="start-tour" class="btn-form btn-accent">Iniciar tour</button>
+            </div>
         </header>
 
         <!-- Formulario -->
@@ -352,6 +355,18 @@
                 <p class="text-sm" style="color:#9ca3af">(Esta es una estimación basada en los datos proporcionados y promedios del restaurante)</p>
             </div>
 
+    </div>
+
+    <!-- Overlay del tour -->
+    <div id="tour-overlay" class="fixed inset-0 hidden" style="background:rgba(0,0,0,0.65); z-index:60;">
+        <div id="tour-popover" class="card-bg" style="position:absolute; max-width: 360px; padding:1rem; border-radius:1rem; box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+            <div id="tour-content" style="color:#e5e7eb; font-size:0.95rem; line-height:1.4;"></div>
+            <div class="pad-top-4" style="display:flex; justify-content:space-between; gap:0.5rem;">
+                <button id="tour-prev" class="btn-form" style="background:#374151; color:#fff;">⏮️</button>
+                <button id="tour-end" class="btn-form" style="background:#4B5563; color:#fff;">✅</button>
+                <button id="tour-next" class="btn-form" style="background:#374151; color:#fff;">⏭️</button>
+            </div>
+        </div>
     </div>
 
     <!-- Imagen del bot de camarai -->
