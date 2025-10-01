@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Rentabilidad - Camarai</title>
+    <title>Generador de Rentabilidad</title>
     <link rel="icon" type="image/svg+xml" href="resources/favicon/claro.svg" media="(prefers-color-scheme: light)">
     <link rel="icon" type="image/svg+xml" href="resources/favicon/oscuro.svg" media="(prefers-color-scheme: dark)">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,10 +27,9 @@
         body { top: 0 !important; }
 
         .card-bg {
-            background-color: #20212f;
+            background: linear-gradient(#20212f, #20212f) padding-box,
+                        linear-gradient(to right, #9D59E7, #6641A5) border-box;
             border: 1px solid transparent;
-            border-image: linear-gradient(to right, #9D59E7, #6641A5);
-            border-image-slice: 1;
         }
 
         .btn-accent {
