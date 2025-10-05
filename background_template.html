@@ -1,0 +1,130 @@
+<!-- ESTE BACKGROUND ES UN TEMPLATE PARA COPIAR Y PEGAR EL FONDO A-HOLE EN CUALQUIER PAGINA -->
+<!-- MODIFICADO POR SOCIETY -->
+ 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#554696">
+    <title>CamarAI - Background Animation</title>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #141414;
+            overflow: hidden;
+        }
+
+        /* Container para el fondo animado */
+        .animated-background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0; 
+            overflow: hidden;
+        }
+
+        /* Elemento a-hole principal */
+        a-hole {
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Capa de fondo con gradiente radial para crear el "agujero" */
+        a-hole:before {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 2;
+            display: block;
+            width: 150%;
+            height: 140%;
+            background: radial-gradient(ellipse at 50% 55%, transparent 10%, black 100%);
+            transform: translate3d(-50%, -50%, 0);
+            content: "";
+        }
+
+        /* Capa de color con overlay para efectos visuales */
+        a-hole:after {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 5;
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 50% 75%, #a900ff 20%, transparent 75%);
+            mix-blend-mode: overlay;
+            transform: translate3d(-50%, -50%, 0);
+            content: "";
+        }
+
+        /* Animación del aura con gradiente animado */
+        @keyframes aura-glow {
+            0% {
+                background-position: 0 100%;
+            }
+            100% {
+                background-position: 0 300%;
+            }
+        }
+
+        /* Elemento aura con gradiente animado y efectos de blur */
+        a-hole .aura {
+            position: absolute;
+            top: -71.5%;
+            left: 50%;
+            z-index: 3;
+            width: 30%;
+            height: 140%;
+            background: linear-gradient(
+                20deg,
+                #00f8f1,
+                #ffbd1e20 16.5%,
+                #fe848f 33%,
+                #fe848f20 49.5%,
+                #00f8f1 66%,
+                #00f8f160 85.5%,
+                #ffbd1e 100%
+            ) 0 100% / 100% 200%;
+            border-radius: 0 0 100% 100%;
+            filter: blur(50px);
+            mix-blend-mode: plus-lighter;
+            opacity: 0.75;
+            transform: translate3d(-50%, 0, 0);
+            animation: aura-glow 5s infinite linear;
+        }
+
+        /* Canvas para efectos adicionales */
+        a-hole canvas.js-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Container principal para el fondo animado -->
+    <div class="animated-background-container">
+        <a-hole>
+            <canvas class="js-canvas"></canvas>
+            <div class="aura"></div>
+        </a-hole>
+    </div>
+
+</body>
+</html>
