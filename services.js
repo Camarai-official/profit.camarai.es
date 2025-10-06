@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (wa || email) {
             status_opened_with_params = true
         }
-        
+
         if (status_opened_with_params)
         {
             fetch('https://bot1.camarai.es/webhook/genreport-opened', {
@@ -106,12 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: [nombreRestaurante, nombreRestaurante + ' + Camarai'],
 					datasets: [
 						{
-                            label: 'Ganancia base (Takos)',
+                            label: 'Ganancia base (' + nombreRestaurante + ')',
 							data: [base, 0],
 							backgroundColor: '#E74C3C'
 						},
 						{
-                            label: 'Ganancia base (Takos + Camarai)',
+                            label: 'Ganancia base (' + nombreRestaurante + ' + Camarai)',
 							data: [0, base],
 							backgroundColor: '#9D59E7'
 						},
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			}
 		});
-        
+
         // --- Función para mostrar estilo de charts ---
 		function setChartPrintStyles(chart, printing) {
 			try {
