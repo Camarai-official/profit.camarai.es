@@ -28,7 +28,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 0; 
+            z-index: 0;
             overflow: hidden;
         }
 
@@ -359,7 +359,7 @@
             <div class="aura"></div>
         </a-hole>
     </div>
-    
+
     <div class="page-wrap stack-8" style="position: relative; z-index: 1;">
         <div id="logo-wrap" class="center-text" style="margin-bottom: 2rem;">
             <img src="resources/logo/camarai.gif" alt="Camarai" style="display:inline-block; max-width:100px; width:100%; height:auto;">
@@ -488,7 +488,10 @@
             </div>
 
             <div class="actions-row">
-                <button onclick="window.print()" class="btn-form btn-accent btn-responsive">Descargar informe</button>
+                <button onclick="window.print()" class="btn-form btn-accent btn-responsive" style="display:flex; align-items:center; gap:0.75rem; justify-content:center;">
+                    <img src="resources/logo/camarai logo.png" alt="Camarai" style="height:28px; width:auto; display:inline-block;">
+                    <span>Descargar informe</span>
+                </button>
             </div>
         </div>
 

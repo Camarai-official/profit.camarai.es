@@ -310,4 +310,44 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (_) {}
     });
 
+    function setupPrintLogoHandler() {
+        const logoImg = document.querySelector('#logo-wrap img');
+        if (!logoImg) return;
+
+        const originalSrc = logoImg.getAttribute('src');
+        const pngSrc = 'resources/logo/camarai logo.png';
+
+        function handleBeforePrintLogo() {
+            try { logoImg.setAttribute('src', pngSrc); } catch (e) {}
+        }
+
+        function handleAfterPrintLogo() {
+            try { logoImg.setAttribute('src', originalSrc); } catch (e) {}
+        }
+
+        if (window.matchMedia) {
+            try {
+                const mediaQueryList = window.matchMedia('print');
+                mediaQueryList.addEventListener('change', function (mql) {
+                    if (mql.matches) handleBeforePrintLogo();
+                    else handleAfterPrintLogo();
+                });
+            } catch (_) {}
+        }
+
+        try { window.addEventListener('beforeprint', handleBeforePrintLogo); } catch (_) {}
+        try { window.addEventListener('afterprint', handleAfterPrintLogo); } catch (_) {}
+
+        const printButtons = document.querySelectorAll('button[onclick]');
+        printButtons.forEach(btn => {
+            const attr = btn.getAttribute('onclick');
+            if (!attr) return;
+            if (attr.includes('window.print')) {
+                btn.addEventListener('click', function() {
+                });
+            }
+        });
+    }
+    setupPrintLogoHandler();
+
 });
