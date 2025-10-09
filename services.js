@@ -63,6 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return { locale, currency, currencyFormatter, suffixCurrencyFormatter, numberFormatter };
     }
 
+    let empresa = '';
+
     function getParamsUrl() {
         let wa = ''
         let email = ''
@@ -82,6 +84,16 @@ document.addEventListener('DOMContentLoaded', () => {
             status_opened_with_params = true
         }
 
+        empresa = params.get('empresa') || ''
+        if (empresa)
+        {
+            const companyInput = document.getElementById('company');
+            if (companyInput)
+            {
+                companyInput.value = empresa;
+            }
+        }
+
         if (status_opened_with_params)
         {
             fetch('https://bot1.camarai.es/webhook/genreport-opened', {
@@ -93,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     getParamsUrl()
-
 
     // --- Función para renderizar gráfico de barras ---
     function renderBarChart(nombreRestaurante, minRevenue, maxRevenue) {
@@ -211,7 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
             coste_productos_mensual: parseFloat(values[5]),
             suministro_mensual: parseFloat(values[6]),
             numero_mesas: parseInt(values[7]),
-            numero_comandas_diarias: parseInt(values[8])
+            numero_comandas_diarias: parseInt(values[8]),
+            empresa: empresa,
+            time: new Date().toISOString()
         };
     }
 
