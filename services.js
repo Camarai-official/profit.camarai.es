@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getParamsUrl() {
         let wa = ''
         let email = ''
+        let name = ''
         let status_opened_with_params = false
 
         const raw = (window.location && (window.location.hash || window.location.search)) || ''
@@ -75,8 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         wa = params.get('wa') || ''
         email = params.get('email') || ''
+        name = params.get('name') || ''
 
-        if (wa || email) {
+        if (wa || email || name) {
             status_opened_with_params = true
         }
 
@@ -85,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch('https://bot1.camarai.es/webhook/genreport-opened', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wa, email })
+            body: JSON.stringify({ wa, email, name })
         });
         }
     }
