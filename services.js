@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderBarChart(
                 p.nombre_restaurante ?? data.nombre_restaurante,
                 p.facturacion_mensual_minima ?? data.facturacion_media_mensual,
-				((p.facturacion_mensual_maxima ?? data.facturacion_media_mensual) + (staffDelta ?? 0)),
+				p.facturacion_mensual_maxima ?? data.facturacion_media_mensual,
                 data,
                 p
             );
@@ -287,10 +287,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const upsellWith = p.facturacion_mensual_maxima - p.facturacion_mensual_minima;
             setTextById('upsell-with', suffixCurrencyFormatter(upsellWith));
 
+            setTextById('product-cost-without', suffixCurrencyFormatter(data.coste_productos_mensual));
+            setTextById('product-cost-with', suffixCurrencyFormatter(p.coste_productos_mensual));
+
             setTextById('orders-without', numberFormatter.format(data.numero_comandas_diarias));
             setTextById('orders-with', numberFormatter.format(p.numero_comandas_diarias ?? data.numero_comandas_diarias));
 
-            const totalSavings = (upsellWith ?? 0) + (staffDelta ?? 0);
+            // Calcular beneficios adicionales (upselling)
+            const beneficiosCamarai = (p.facturacion_mensual_maxima ?? 0) - (p.facturacion_mensual_minima ?? 0);
+
+            // Calcular reducción total de costes
+            const reduccionTrabajadores = (data.coste_trabajadores_mensual ?? 0) - (p.coste_trabajadores_mensual ?? 0);
+            const reduccionProductos = (data.coste_productos_mensual ?? 0) - (p.coste_productos_mensual ?? 0);
+            const reduccionTotalCostes = reduccionTrabajadores + reduccionProductos;
+
+            // Calcular ahorro total mensual
+            const totalSavings = beneficiosCamarai + reduccionTotalCostes;
+
+            // Mostrar ahorro anual
             setTextById('yearly-savings', `+ ${suffixCurrencyFormatter(totalSavings*12)}`);
             const savingsCard = document.getElementById('savings-card');
             if (savingsCard) savingsCard.classList.remove('hidden');
