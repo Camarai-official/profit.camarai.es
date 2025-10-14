@@ -96,11 +96,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Función para renderizar gráfico de barras ---
-    function renderBarChart(nombreRestaurante, minRevenue, maxRevenue) {
+    function renderBarChart(nombreRestaurante, minRevenue, maxRevenue, data, processedData) {
 		const ctx = document.getElementById('bar-chart-rentabilidad').getContext('2d');
 		if (barChart) barChart.destroy();
-		const base = minRevenue ?? 0;
-		const mejora = Math.max((maxRevenue ?? 0) - base, 0);
+
+		// Calcular ingresos y gastos base (empresa sola)
+		const ingresosBase = data.facturacion_media_mensual ?? 0;
+		const gastosBase = (data.coste_trabajadores_mensual ?? 0) + (data.coste_alquiler_mensual ?? 0) +
+						   (data.coste_productos_mensual ?? 0) + (data.suministro_mensual ?? 0);
+
+		// Calcular beneficios adicionales de Camarai
+		const beneficiosCamarai = Math.max((maxRevenue ?? 0) - (minRevenue ?? 0), 0);
+
+		// Calcular reducción de costes de Camarai
+		const reduccionTrabajadores = (data.coste_trabajadores_mensual ?? 0) - (processedData.coste_trabajadores_mensual ?? 0);
+		const reduccionProductos = (data.coste_productos_mensual ?? 0) - (processedData.coste_productos_mensual ?? 0);
+		const reduccionTotalCostes = Math.max(reduccionTrabajadores + reduccionProductos, 0);
+
+		// Calcular gastos con Camarai (gastos base - reducción)
+		const gastosConCamarai = gastosBase - reduccionTotalCostes;
+
         const { locale, currency, suffixCurrencyFormatter } = getNumberFormatter();
 		barChart = new Chart(ctx, {
 			type: 'bar',
@@ -108,19 +123,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: [nombreRestaurante, nombreRestaurante + ' + Camarai'],
 					datasets: [
 						{
-                            label: 'Ganancia base (' + nombreRestaurante + ')',
-							data: [base, 0],
-							backgroundColor: '#E74C3C'
+                            label: 'Ingresos',
+							data: [ingresosBase, ingresosBase],
+							backgroundColor: '#FFD700',
+							stack: 'ingresos'
 						},
 						{
-                            label: 'Ganancia base (' + nombreRestaurante + ' + Camarai)',
-							data: [0, base],
-							backgroundColor: '#9D59E7'
+                            label: 'Gastos',
+							data: [gastosBase, gastosConCamarai],
+							backgroundColor: '#E74C3C',
+							stack: 'gastos'
 						},
 						{
-                            label: 'Mejora con Camarai',
-							data: [0, mejora],
-							backgroundColor: '#34D399'
+                            label: '+ Beneficios Camarai',
+							data: [0, beneficiosCamarai],
+							backgroundColor: '#34D399',
+							stack: 'ingresos'
+						},
+						{
+                            label: '- Reducción Costes Camarai',
+							data: [0, reduccionTotalCostes],
+							backgroundColor: '#2ECC71',
+							stack: 'gastos'
                         }
 					]
 			},
@@ -139,8 +163,15 @@ document.addEventListener('DOMContentLoaded', () => {
 				},
 				layout: { padding: { top: 8 } },
 				scales: {
-					x: { ticks: { color: '#E0E0E0', font: { weight: 'bold' } } },
-					y: { beginAtZero: true, ticks: { color: '#E0E0E0', font: { weight: 'bold' } } }
+					x: {
+						stacked: true,
+						ticks: { color: '#E0E0E0', font: { weight: 'bold' } }
+					},
+					y: {
+						stacked: true,
+						beginAtZero: true,
+						ticks: { color: '#E0E0E0', font: { weight: 'bold' } }
+					}
 				}
 			}
 		});
@@ -239,7 +270,9 @@ document.addEventListener('DOMContentLoaded', () => {
             renderBarChart(
                 p.nombre_restaurante ?? data.nombre_restaurante,
                 p.facturacion_mensual_minima ?? data.facturacion_media_mensual,
-				((p.facturacion_mensual_maxima ?? data.facturacion_media_mensual) + (staffDelta ?? 0))
+				((p.facturacion_mensual_maxima ?? data.facturacion_media_mensual) + (staffDelta ?? 0)),
+                data,
+                p
             );
 
             // --- Comparativas punto a punto ---
@@ -317,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!logoImg) return;
 
         const originalSrc = logoImg.getAttribute('src');
-        const pngSrc = 'resources/logo/camarai logo.png';
+        const pngSrc = 'resources/logo/camarai-logo.png';
 
         function handleBeforePrintLogo() {
             try { logoImg.setAttribute('src', pngSrc); } catch (e) {}
