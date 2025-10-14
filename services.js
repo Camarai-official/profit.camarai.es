@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             status_opened_with_params = true
         }
 
-        empresa = params.get('empresa') || ''
+        empresa = params.get('company') || ''
         if (empresa)
         {
             const companyInput = document.getElementById('company');
