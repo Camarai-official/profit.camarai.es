@@ -125,6 +125,16 @@ La app es estática. Puedes servir el directorio con Nginx, Apache, S3+CloudFron
 - **Gráfico vacío**: confirma que el backend devuelve los campos esperados.
 - **404 en services.js**: crea `services.js` a partir de `services.example.js` en la raíz.
 
+### 🕵🏻‍♂️ Obtención de datos mediante creación de PARAM URL
+- **Formato de URL Email: https://www.url.es/#?email=miguel@camarai.es**
+- **Formato de URL Whatsapp(Número): https://www.url.es/#?wa=+34612345678**
+- **Formato de URL Nombre: https://www.url.es/#?name=MiguelDev**
+- **Formato de URL Empresa: https://www.url.es/#?company=Takos**
+
+- **Formato de URL completa: https://www.url.es/#?email=miguel@camarai.es?wa=+34612345678?name=MiguelDev?company=Takos**
+  
+**(No pasa nada si falta algún parametro, pero si queremos que se guarde en BBDD la relación con la empresa, el parametro company es requerido)**
+
 ### ✨ Copyright 2025 CamarAI
 
 Todos los derechos reservados.
